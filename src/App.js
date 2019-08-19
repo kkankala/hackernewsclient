@@ -2,15 +2,15 @@ import React, { Component } from 'react';
 import './App.css';
 
 const largeColumn = {
-  width: '40%',
+  width: '40%'
 };
 
 const midColumn = {
-  width: '30%',
+  width: '30%'
 };
 
 const smallColumn = {
-  width: '10%',
+  width: '10%'
 };
 
 const DEFAULT_QUERY = 'redux';
@@ -19,10 +19,10 @@ const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
 
 //Higher Order function. f(f(x))
-const isSearched = searchTerm => item =>
-  item.title.toLowerCase().includes(searchTerm.toLowerCase());
+// const isSearched = searchTerm => item =>
+//   item.title.toLowerCase().includes(searchTerm.toLowerCase());
 
-  class App extends Component {
+class App extends Component {
   constructor(props) {
     super(props);
 
@@ -32,35 +32,47 @@ const isSearched = searchTerm => item =>
     };
 
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
+    this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
+    this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
   }
 
   onSearchChange(event) {
     this.setState({ searchTerm: event.target.value });
   }
-  
+
+  onSearchSubmit(event) {
+    event.preventDefault();
+    const { searchTerm } = this.state;
+    this.fetchSearchTopStories(searchTerm);
+  }
+  fetchSearchTopStories(searchTerm) {
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+      .then(response => response.json())
+      .then(result => this.setSearchTopStories(result))
+      .catch(error => error);
+  }
   setSearchTopStories(result) {
     this.setState({ result });
   }
 
   onDismiss(id) {
     const isNotId = item => item.objectID !== id;
-    const updatedList = this.state.list.filter(isNotId);
-    this.setState({ list: updatedList });
+    const updatedList = this.state.result.hits.filter(isNotId);
+    this.setState({ result: { ...this.state.result, hits: updatedList } });
   }
 
   componentDidMount() {
     const { searchTerm } = this.state;
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
-    .then(response => response.json())
-    .then(result => this.setSearchTopStories(result))
-    .catch(error => error);
+    this.fetchSearchTopStories(searchTerm);
   }
 
   render() {
     const { searchTerm, result } = this.state;
-    if (!result) { return null; }
+    if (!result) {
+      return null;
+    }
 
     return (
       <div className="page">
@@ -68,45 +80,41 @@ const isSearched = searchTerm => item =>
           <Search
             value={searchTerm}
             onChange={this.onSearchChange}
+            onSubmit={this.onSearchSubmit}
           >
             Search
           </Search>
         </div>
-        <Table
-          list={result.hits}
-          pattern={searchTerm}
-          onDismiss={this.onDismiss}
-        />
+        {result && (
+          <Table
+            list={result.hits}
+            //pattern={searchTerm}
+            onDismiss={this.onDismiss}
+          />
+        )}
       </div>
     );
   }
 }
 
-const Search = ({ value, onChange, children }) =>
-  <form>
-    {children} <input
-      type="text"
-      value={value}
-      onChange={onChange}
-    />
+const Search = ({ value, onChange, onSubmit, children }) => (
+  <form onSubmit={onSubmit}>
+    <input type="text" value={value} onChange={onChange} />
+    <button type="submit">{children}</button>
   </form>
+);
 
-const Table = ({ list, pattern, onDismiss }) =>
+const Table = ({ list, pattern, onDismiss }) => (
   <div className="table">
-    {list.filter(isSearched(pattern)).map(item =>
+    {/* {list.filter(isSearched(pattern)).map(item => ( */}
+    {list.map(item => (
       <div key={item.objectID} className="table-row">
         <span style={largeColumn}>
           <a href={item.url}>{item.title}</a>
         </span>
-        <span style={midColumn}>
-          {item.author}
-        </span>
-        <span style={smallColumn}>
-          {item.num_comments}
-        </span>
-        <span style={smallColumn}>
-          {item.points}
-        </span>
+        <span style={midColumn}>{item.author}</span>
+        <span style={smallColumn}>{item.num_comments}</span>
+        <span style={smallColumn}>{item.points}</span>
         <span style={smallColumn}>
           <Button
             onClick={() => onDismiss(item.objectID)}
@@ -116,21 +124,14 @@ const Table = ({ list, pattern, onDismiss }) =>
           </Button>
         </span>
       </div>
-    )}
+    ))}
   </div>
+);
 
-
-const Button = ({
-  onClick,
-  className = '',
-  children,
-}) =>
-  <button
-    onClick={onClick}
-    className={className}
-    type="button"
-  >
+const Button = ({ onClick, className = '', children }) => (
+  <button onClick={onClick} className={className} type="button">
     {children}
   </button>
+);
 
 export default App;
