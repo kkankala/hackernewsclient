@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
+import axios from 'axios';
 
 const largeColumn = {
   width: '40%'
@@ -33,7 +34,8 @@ class App extends Component {
     this.state = {
       results: null,
       searchKey:'',
-      searchTerm: DEFAULT_QUERY
+      searchTerm: DEFAULT_QUERY,
+      error: null
     };
 
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
@@ -67,7 +69,7 @@ class App extends Component {
     )
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
-      .catch(error => error);
+      .catch(error => this.setState({error}));
   }
 
   setSearchTopStories(result) {
@@ -77,14 +79,14 @@ class App extends Component {
     const oldHits = results && results[searchKey] ? results[searchKey].hits : [];
 
     const updatedHits = [...oldHits,...hits];
-    console.log("Set Search top Stories:",updatedHits)
+    // console.log("Set Search top Stories:",updatedHits)
     this.setState({
       results: {
       ...results,
       [searchKey]: { hits: updatedHits, page }
       }
       });
-    console.log(this.state);
+    // console.log(this.state);
   }
 
   onDismiss(id) {
@@ -104,11 +106,12 @@ class App extends Component {
   }
 
   render() {
-    const { searchTerm, results,searchKey } = this.state;
+    const { searchTerm, results,searchKey,error } = this.state;
     
     const page = (results && results[searchKey] && results[searchKey].page) || 0;
 
     const list = (results && results[searchKey] && results[searchKey].hits) || [];
+    
 
     return (
       <div className="page">
@@ -121,11 +124,16 @@ class App extends Component {
             Search
           </Search>
         </div>
-          <Table
-            list={list}
-            //pattern={searchTerm}
-            onDismiss={this.onDismiss}
-          />
+          { error ?
+            <div className="interactions">
+              <p>Something went wrong.</p>
+            </div> :
+            <Table
+              list={list}
+              //pattern={searchTerm}
+              onDismiss={this.onDismiss}
+            />
+          }
         <div className="interactions">
           <Button
             onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}
