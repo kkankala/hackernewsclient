@@ -3,23 +3,23 @@ import { sortBy } from "lodash";
 import classNames from "classnames";
 
 const largeColumn = {
-  width: "40%"
+  width: "40%",
 };
 
 const midColumn = {
-  width: "30%"
+  width: "30%",
 };
 
 const smallColumn = {
-  width: "10%"
+  width: "10%",
 };
 
 const SORTS = {
-  NONE: list => list,
-  TITLE: list => sortBy(list, "title"),
-  AUTHOR: list => sortBy(list, "author"),
-  COMMENTS: list => sortBy(list, "num_comments").reverse(),
-  POINTS: list => sortBy(list, "points").reverse()
+  NONE: (list) => list,
+  TITLE: (list) => sortBy(list, "title"),
+  AUTHOR: (list) => sortBy(list, "author"),
+  COMMENTS: (list) => sortBy(list, "num_comments").reverse(),
+  POINTS: (list) => sortBy(list, "points").reverse(),
 };
 
 export class Table extends Component {
@@ -28,7 +28,7 @@ export class Table extends Component {
 
     this.state = {
       sortKey: "NONE",
-      isSortReverse: false
+      isSortReverse: false,
     };
 
     this.onSort = this.onSort.bind(this);
@@ -89,7 +89,7 @@ export class Table extends Component {
           </span>
           <span style={{ width: "10%" }}>Archive</span>
         </div>
-        {reverseSortedList.map(item => (
+        {reverseSortedList.map((item) => (
           <div key={item.objectID} className="table-row">
             <span style={largeColumn}>
               <a href={item.url}>{item.title}</a>
@@ -113,8 +113,10 @@ export class Table extends Component {
 }
 
 const Loading = () => <div>Loading ...</div>;
-const withLoading = Component => ({ isLoading, ...restProps }) =>
-  isLoading ? <Loading /> : <Component {...restProps} />;
+const withLoading =
+  (Component) =>
+  ({ isLoading, ...restProps }) =>
+    isLoading ? <Loading /> : <Component {...restProps} />;
 
 const Button = ({ onClick, className = "", children }) => (
   <button onClick={onClick} className={className} type="button">
@@ -128,7 +130,7 @@ const Sort = ({ sortKey, activeSortKey, onSort, children }) => {
   // sortClass.push('button-active');
   // }
   const sortClass = classNames("button-inline", {
-    "button-active": sortKey === activeSortKey
+    "button-active": sortKey === activeSortKey,
   });
   return (
     <Button onClick={() => onSort(sortKey)} className={sortClass}>

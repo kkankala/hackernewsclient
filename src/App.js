@@ -26,7 +26,7 @@ class App extends Component {
       searchKey: "",
       searchTerm: DEFAULT_QUERY,
       error: null,
-      isLoading: false
+      isLoading: false,
     };
 
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
@@ -59,8 +59,8 @@ class App extends Component {
     axios(
       `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`
     )
-      .then(result => this.setSearchTopStories(result.data))
-      .catch(error => this.setState({ error }));
+      .then((result) => this.setSearchTopStories(result.data))
+      .catch((error) => this.setState({ error }));
   }
 
   setSearchTopStories(result) {
@@ -75,9 +75,9 @@ class App extends Component {
     this.setState({
       results: {
         ...results,
-        [searchKey]: { hits: updatedHits, page }
+        [searchKey]: { hits: updatedHits, page },
       },
-      isLoading: false
+      isLoading: false,
     });
     // console.log(this.state);
   }
@@ -86,11 +86,11 @@ class App extends Component {
     const { searchKey, results } = this.state;
     const { hits, page } = results[searchKey];
 
-    const isNotId = item => item.objectID !== id;
+    const isNotId = (item) => item.objectID !== id;
     const updatedHits = hits.filter(isNotId);
 
     this.setState({
-      results: { ...results, [searchKey]: { hits: updatedHits, page } }
+      results: { ...results, [searchKey]: { hits: updatedHits, page } },
     });
   }
 
